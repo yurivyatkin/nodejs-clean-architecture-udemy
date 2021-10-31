@@ -27,6 +27,6 @@ module.exports = {
     return null;
   },
   getById: async (id) => {
-    return inMemoryDb.users.find((item) => item.id === user.id);
+    return inMemoryDb.users.find((item) => item.id === id);
   },
 };

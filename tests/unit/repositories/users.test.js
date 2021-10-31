@@ -28,6 +28,9 @@ describe('Users repository', () => {
     expect(addedUser.lastName).toBe(testUser.lastName);
     expect(addedUser.gender).toBe(testUser.gender);
     expect(addedUser.meta).toBe(testUser.meta);
+
+    const returnedUser = await usersRepository.getById(addedUser.id);
+    expect(returnedUser).toEqual(addedUser);
   });
   test('New user should be deleted', async () => {});
   test('New user should be updated', async () => {});
