@@ -21,7 +21,7 @@ module.exports = {
   delete: async (user) => {
     const index = inMemoryDb.users.findIndex((item) => item.id === user.id);
     if (index >= 0) {
-      inMemoryDb.users.splice(index, 0);
+      inMemoryDb.users.splice(index, 1);
       return user;
     }
     return null;
