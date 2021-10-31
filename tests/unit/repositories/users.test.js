@@ -1,4 +1,5 @@
 const Chance = require('chance');
+const { cloneDeep } = require('lodash');
 
 const { usersRepository } = require('../../../src/repositories/inMemory');
 
@@ -70,5 +71,25 @@ describe('Users repository', () => {
     );
     expect(shouldBeDefinedUser).toBeDefined();
   });
-  test('New user should be updated', async () => {});
+  test('New user should be updated', async () => {
+    // add a user
+    const testUser = new User({
+      name: chance.name(),
+      lastName: chance.last(),
+      gender: genders.FEMALE,
+      meta: {
+        hair: { color: 'black' },
+      },
+    });
+    const addedUser = await usersRepository.add(testUser);
+    expect(addedUser).toBeDefined();
+    // update the user
+    const clonedUser = cloneDeep({
+      ...addedUser,
+      name: chance.name,
+      gender: genders.MALE,
+    });
+    const updatedUser = await usersRepository.update(clonedUser);
+    expect(updatedUser).toEqual(clonedUser);
+  });
 });
