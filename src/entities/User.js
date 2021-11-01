@@ -1,4 +1,4 @@
-const User = class User {
+class User {
   constructor({
     id,
     name = null,
