@@ -3,7 +3,12 @@ const Chance = require('chance');
 const { v4: uuidv4 } = require('uuid');
 
 const {
-  user: { addUserUseCase, getUserByIdUseCase, updateUserUseCase },
+  user: {
+    addUserUseCase,
+    getUserByIdUseCase,
+    updateUserUseCase,
+    deleteUserUseCase,
+  },
 } = require('../../../src/useCases');
 
 const {
@@ -29,6 +34,7 @@ describe('User Use Cases', () => {
       meta: {},
     })),
     update: jest.fn(async (user) => user),
+    delete: jest.fn(async (user) => user),
   };
 
   const dependencies = {
@@ -112,6 +118,32 @@ describe('User Use Cases', () => {
       expect(updatedUser).toEqual(testUserData);
       // check the call
       const expectedUser = mockUserRepo.update.mock.calls[0][0];
+      expect(expectedUser).toBe(testUserData);
+    });
+  });
+
+  describe('Delete user use case', () => {
+    test('user should be deleted', async () => {
+      // create user data
+      const testUserData = new User({
+        id: uuidv4(),
+        name: chance.name(),
+        lastName: chance.last(),
+        gender: genders.FEMALE,
+        meta: {
+          education: {
+            school: 'full',
+          },
+        },
+      });
+      // call delete user
+      const updatedUser = await deleteUserUseCase(dependencies).execute({
+        user: testUserData,
+      });
+      // check the result
+      expect(updatedUser).toEqual(testUserData);
+      // check the call
+      const expectedUser = mockUserRepo.delete.mock.calls[0][0];
       expect(expectedUser).toBe(testUserData);
     });
   });
