@@ -3,7 +3,7 @@ const Chance = require('chance');
 const { v4: uuidv4 } = require('uuid');
 
 const {
-  product: { addProductUseCase, getProductByIdUseCase },
+  product: { addProductUseCase, getProductByIdUseCase, updateProductUseCase },
 } = require('../../../src/useCases');
 
 const { Product } = require('../../../src/entities');
@@ -27,6 +27,7 @@ describe('Products Use Cases', () => {
         stock: chance.integer({ min: 1, max: 100 }),
       },
     })),
+    update: jest.fn(async (user) => user),
   };
 
   const dependencies = {
@@ -91,6 +92,31 @@ describe('Products Use Cases', () => {
       // check the mock
       const expectedId = mockProductRepo.getById.mock.calls[0][0];
       expect(expectedId).toBe(testId);
+    });
+  });
+
+  describe('Update product use case', () => {
+    test('product should be updated', async () => {
+      // create product data
+      const testProductData = new Product({
+        name: chance.name(),
+        description: chance.paragraph(),
+        images: [],
+        price: chance.integer({ min: 1, max: 100 }),
+        color: 'blue',
+        meta: {
+          stock: chance.integer({ min: 1, max: 100 }),
+        },
+      });
+      // call update product
+      const updatedProduct = await updateProductUseCase(dependencies).execute({
+        product: testProductData,
+      });
+      // check the result
+      expect(updatedProduct).toEqual(testProductData);
+      // check the call
+      const expectedProduct = mockProductRepo.update.mock.calls[0][0];
+      expect(expectedProduct).toBe(testProductData);
     });
   });
 });
