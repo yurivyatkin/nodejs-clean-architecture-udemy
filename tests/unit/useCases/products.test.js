@@ -3,7 +3,12 @@ const Chance = require('chance');
 const { v4: uuidv4 } = require('uuid');
 
 const {
-  product: { addProductUseCase, getProductByIdUseCase, updateProductUseCase },
+  product: {
+    addProductUseCase,
+    getProductByIdUseCase,
+    updateProductUseCase,
+    deleteProductUseCase,
+  },
 } = require('../../../src/useCases');
 
 const { Product } = require('../../../src/entities');
@@ -27,7 +32,8 @@ describe('Products Use Cases', () => {
         stock: chance.integer({ min: 1, max: 100 }),
       },
     })),
-    update: jest.fn(async (user) => user),
+    update: jest.fn(async (product) => product),
+    delete: jest.fn(async (product) => product),
   };
 
   const dependencies = {
@@ -116,6 +122,32 @@ describe('Products Use Cases', () => {
       expect(updatedProduct).toEqual(testProductData);
       // check the call
       const expectedProduct = mockProductRepo.update.mock.calls[0][0];
+      expect(expectedProduct).toBe(testProductData);
+    });
+  });
+
+  describe('Delete product use case', () => {
+    test('product should be deleted', async () => {
+      // create product data
+      const testProductData = new Product({
+        id: uuidv4(),
+        name: chance.name(),
+        description: chance.paragraph(),
+        images: [],
+        price: chance.integer({ min: 1, max: 100 }),
+        color: 'green',
+        meta: {
+          stock: chance.integer({ min: 1, max: 100 }),
+        },
+      });
+      // call delete product
+      const updatedProduct = await deleteProductUseCase(dependencies).execute({
+        product: testProductData,
+      });
+      // check the result
+      expect(updatedProduct).toEqual(testProductData);
+      // check the call
+      const expectedProduct = mockProductRepo.delete.mock.calls[0][0];
       expect(expectedProduct).toBe(testProductData);
     });
   });
