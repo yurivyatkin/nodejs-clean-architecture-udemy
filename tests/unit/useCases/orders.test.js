@@ -3,7 +3,7 @@ const Chance = require('chance');
 const { v4: uuidv4 } = require('uuid');
 
 const {
-  order: { addOrderUseCase, getOrderByIdUseCase },
+  order: { addOrderUseCase, getOrderByIdUseCase, updateOrderUseCase },
 } = require('../../../src/useCases');
 
 const { Order } = require('../../../src/entities');
@@ -18,7 +18,7 @@ describe('Orders Use Cases', () => {
     })),
     getById: jest.fn(async (id) => ({
       id,
-      userId: chance.guid(),
+      orderId: chance.guid(),
       orderIds: [chance.guid()],
       date: new Date(),
       isPayed: false,
@@ -26,6 +26,7 @@ describe('Orders Use Cases', () => {
         test: 'test',
       },
     })),
+    update: jest.fn(async (product) => product),
   };
 
   const dependencies = {
@@ -36,7 +37,7 @@ describe('Orders Use Cases', () => {
     it('should add an order using the given repository', async () => {
       // create order data
       const testOrderData = new Order({
-        userId: chance.guid(),
+        orderId: chance.guid(),
         orderIds: [chance.guid()],
         date: new Date(),
         isPayed: false,
@@ -51,7 +52,7 @@ describe('Orders Use Cases', () => {
       // check the received data
       expect(addedOrder).toBeDefined();
       expect(addedOrder.id).toBeDefined();
-      expect(addedOrder.userId).toBe(testOrderData.userId);
+      expect(addedOrder.orderId).toBe(testOrderData.orderId);
       expect(addedOrder.orderIds).toEqual(testOrderData.orderIds);
       expect(addedOrder.date).toEqual(testOrderData.date);
       expect(addedOrder.isPayed).toBe(testOrderData.isPayed);
@@ -59,7 +60,7 @@ describe('Orders Use Cases', () => {
       // check if the dependencies are called as expected
       const call = mockOrderRepo.add.mock.calls[0][0];
       expect(call.id).toBeUndefined();
-      expect(call.userId).toBe(testOrderData.userId);
+      expect(call.orderId).toBe(testOrderData.orderId);
       expect(call.orderIds).toEqual(testOrderData.orderIds);
       expect(call.date).toEqual(testOrderData.date);
       expect(call.isPayed).toBe(testOrderData.isPayed);
@@ -78,7 +79,7 @@ describe('Orders Use Cases', () => {
       // check the data
       expect(orderById).toBeDefined();
       expect(orderById.id).toBe(testId);
-      expect(orderById.userId).toBeDefined();
+      expect(orderById.orderId).toBeDefined();
       expect(orderById.orderIds).toBeDefined();
       expect(orderById.date).toBeDefined();
       expect(orderById.isPayed).toBeDefined();
@@ -86,6 +87,30 @@ describe('Orders Use Cases', () => {
       // check the mock
       const expectedId = mockOrderRepo.getById.mock.calls[0][0];
       expect(expectedId).toBe(testId);
+    });
+  });
+
+  describe('Update order use case', () => {
+    test('order should be updated', async () => {
+      // create order data
+      const testOrderData = new Order({
+        orderId: chance.guid(),
+        orderIds: [chance.guid()],
+        date: new Date(),
+        isPayed: false,
+        meta: {
+          test: 'test',
+        },
+      });
+      // call update order
+      const updatedOrder = await updateOrderUseCase(dependencies).execute({
+        order: testOrderData,
+      });
+      // check the result
+      expect(updatedOrder).toEqual(testOrderData);
+      // check the call
+      const expectedOrder = mockOrderRepo.update.mock.calls[0][0];
+      expect(expectedOrder).toBe(testOrderData);
     });
   });
 });
