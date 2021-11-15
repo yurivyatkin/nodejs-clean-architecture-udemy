@@ -3,7 +3,12 @@ const Chance = require('chance');
 const { v4: uuidv4 } = require('uuid');
 
 const {
-  order: { addOrderUseCase, getOrderByIdUseCase, updateOrderUseCase },
+  order: {
+    addOrderUseCase,
+    getOrderByIdUseCase,
+    updateOrderUseCase,
+    deleteOrderUseCase,
+  },
 } = require('../../../src/useCases');
 
 const { Order } = require('../../../src/entities');
@@ -26,7 +31,8 @@ describe('Orders Use Cases', () => {
         test: 'test',
       },
     })),
-    update: jest.fn(async (product) => product),
+    update: jest.fn(async (order) => order),
+    delete: jest.fn(async (order) => order),
   };
 
   const dependencies = {
@@ -110,6 +116,31 @@ describe('Orders Use Cases', () => {
       expect(updatedOrder).toEqual(testOrderData);
       // check the call
       const expectedOrder = mockOrderRepo.update.mock.calls[0][0];
+      expect(expectedOrder).toBe(testOrderData);
+    });
+  });
+
+  describe('Delete order use case', () => {
+    test('order should be deleted', async () => {
+      // create order data
+      const testOrderData = new Order({
+        id: uuidv4(),
+        orderId: chance.guid(),
+        orderIds: [chance.guid()],
+        date: new Date(),
+        isPayed: false,
+        meta: {
+          test: 'test',
+        },
+      });
+      // call delete order
+      const updatedOrder = await deleteOrderUseCase(dependencies).execute({
+        order: testOrderData,
+      });
+      // check the result
+      expect(updatedOrder).toEqual(testOrderData);
+      // check the call
+      const expectedOrder = mockOrderRepo.delete.mock.calls[0][0];
       expect(expectedOrder).toBe(testOrderData);
     });
   });
